@@ -16,6 +16,10 @@ def _response() -> MatchStateResponse:
         home_score=s.home_score,
         away_score=s.away_score,
         score=s.score_line(),
+        period=s.period,
+        clock_minute=s.clock_minute,
+        stoppage=s.stoppage,
+        clock=s.clock_display(),
     )
 
 
@@ -31,6 +35,9 @@ def update_match(req: MatchUpdateRequest):
         away_team=req.away_team,
         home_score=req.home_score,
         away_score=req.away_score,
+        period=req.period,
+        clock_minute=req.clock_minute,
+        stoppage=req.stoppage,
     )
     return _response()
 
@@ -43,9 +50,8 @@ def add_goal(req: GoalRequest):
         raise HTTPException(status_code=400, detail=str(e)) from e
 
     if req.announce:
-        team = state.home_team if req.side == "home" else state.away_team
         graphics_store.set(
-            GraphicRequest(text=f"GOAL {team}", duration=3.5, style="pulse")
+            GraphicRequest(kind="title", text="GOAL", duration=3.5, style="pulse")
         )
 
     return _response()

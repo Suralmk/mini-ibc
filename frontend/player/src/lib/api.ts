@@ -51,6 +51,9 @@ export async function getHealth() {
     score: string
     home_score: number
     away_score: number
+    period?: string
+    clock?: string
     graphic_active: boolean
+    graphic_kind?: string | null
   }>
 }

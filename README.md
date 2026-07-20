@@ -17,7 +17,8 @@ FastAPI API  (:8000)   ← compose graphics / live score
 ## What you can do
 
 - Live camera over **WebSocket** → native `<video>` player (`canvas.captureStream`)
-- **Graphics desk**: pulse title presets + duration; live score / goal buttons
+- **Graphics desk**: pulse titles, **lower thirds**, **match stats** (simulated Opta / Stats Perform / FIFA), live score / goals
+- **Scorebug**: FIFA-style strip with period (`1H` · `HT` · `2H` · `ET` · `FT`) and stoppage (`90+3'`)
 - **Player**: watch the burned-in world feed (landscape handles on mobile)
 
 ## Project structure
@@ -108,25 +109,40 @@ Frontends proxy `/health`, `/graphics`, `/match`, and `/ws/` to the API containe
 ## How to test
 
 1. Open the **player** (5174) — live `<video>` over WebSocket frames.
-2. Open the **editor** (5173) — set duration, push a preset (e.g. FIFA), or tap **Goal**.
-3. Watch titles and score updates appear on both apps (burned into the feed).
+2. Open the **editor** (5173) — push a title, lower third, or match stats; set period / ET / stoppage.
+3. Watch overlays and the scorebug update on both apps (burned into the feed).
 
 ## API
 
 ```bash
+# Pulse title
 curl -X POST http://127.0.0.1:8000/graphics \
   -H "Content-Type: application/json" \
-  -d '{"text":"FIFA","duration":4,"style":"pulse"}'
+  -d '{"kind":"title","text":"FIFA","duration":4,"style":"pulse"}'
+
+# Lower third
+curl -X POST http://127.0.0.1:8000/graphics \
+  -H "Content-Type: application/json" \
+  -d '{"kind":"lower_third","title":"Lionel Messi","subtitle":"Argentina","line3":"3 Goals in Tournament","duration":6}'
+
+# Match stats (simulated data feed)
+curl -X POST http://127.0.0.1:8000/graphics \
+  -H "Content-Type: application/json" \
+  -d '{"kind":"stats","home_possession":58,"away_possession":42,"home_shots":12,"away_shots":8,"duration":7}'
+
+# Extra time on scorebug
+curl -X PATCH http://127.0.0.1:8000/match \
+  -H "Content-Type: application/json" \
+  -d '{"period":"ET","clock_minute":90,"stoppage":2}'
 
 curl -X POST http://127.0.0.1:8000/match/goal \
   -H "Content-Type: application/json" \
   -d '{"side":"home","announce":true}'
 ```
 
-`GET/PATCH /match` · `POST /match/goal` · `WS /ws/stream`
+`GET/PATCH /match` · `POST /match/goal` · `POST /graphics` (`title` | `lower_third` | `stats`) · `WS /ws/stream`
 
 ## Learn more
 
 - **[How the FIFA World Cup IBC works](FIFA-IBC.md)** — fiber, red/blue paths, multicast, ST 2110, fallbacks  
 - **Video reference:** [Network Chuck — World Cup network / IBC](https://www.youtube.com/watch?v=LhnH0juUaGw)
-# mini-ibc

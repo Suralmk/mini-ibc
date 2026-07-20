@@ -219,7 +219,8 @@ This project is a **tiny teaching toy**, not a real HBS plant:
 | Stadium cameras | Webcam |
 | Fiber + ST 2110 + dual path | Local compose + WebSocket JPEG frames |
 | Multicast to many RHBs | Two React apps (editor + player) |
-| Graphics / scorebug teams | Editor pushes titles + live score API |
+| Graphics / scorebug teams | Editor: titles, lower thirds, stats, ET clock |
+| Opta / Stats Perform / FIFA feeds | Manual stats push (simulated data badge) |
 | TFC + Nexus fabric | FastAPI `FrameHub` fan-out |
 
 ```mermaid

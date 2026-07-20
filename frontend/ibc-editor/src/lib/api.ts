@@ -36,10 +36,26 @@ export type AnimationStyle =
   | 'typewriter'
   | 'pulse'
 
+export type GraphicKind = 'title' | 'lower_third' | 'stats'
+export type MatchPeriod = '1H' | 'HT' | '2H' | 'ET' | 'FT'
+
 export type GraphicPayload = {
-  text: string
+  kind?: GraphicKind
+  text?: string
+  title?: string
+  subtitle?: string
+  line3?: string
   duration: number
-  style: AnimationStyle
+  style?: AnimationStyle
+  home_possession?: number
+  away_possession?: number
+  home_shots?: number
+  away_shots?: number
+  home_on_target?: number
+  away_on_target?: number
+  home_label?: string
+  away_label?: string
+  data_source?: string
 }
 
 export type MatchState = {
@@ -48,6 +64,10 @@ export type MatchState = {
   home_score: number
   away_score: number
   score: string
+  period: MatchPeriod
+  clock_minute: number
+  stoppage: number
+  clock: string
 }
 
 export function wsStreamUrl() {
@@ -62,9 +82,12 @@ export function wsStreamUrl() {
 async function parseJson<T>(res: Response): Promise<T> {
   const data = await res.json()
   if (!res.ok) {
-    throw new Error(
-      typeof data.detail === 'string' ? data.detail : 'Request failed',
-    )
+    const detail = data.detail
+    if (typeof detail === 'string') throw new Error(detail)
+    if (Array.isArray(detail)) {
+      throw new Error(detail.map((d: { msg?: string }) => d.msg).join(', '))
+    }
+    throw new Error('Request failed')
   }
   return data as T
 }
@@ -73,12 +96,14 @@ export async function pushGraphic(payload: GraphicPayload) {
   const res = await fetch(`${API_BASE}/graphics`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ kind: 'title', style: 'pulse', ...payload }),
   })
   return parseJson<{
     ok: boolean
-    text: string
-    style: AnimationStyle
+    kind: GraphicKind
+    text?: string
+    title?: string
+    style?: AnimationStyle
     duration: number
     message: string
   }>(res)
@@ -88,7 +113,10 @@ export async function getActiveGraphic() {
   const res = await fetch(`${API_BASE}/graphics/active`)
   return parseJson<{
     active: boolean
+    kind?: GraphicKind
     text?: string
+    title?: string
+    subtitle?: string
     style?: AnimationStyle
     duration?: number
     remaining?: number
@@ -106,6 +134,9 @@ export async function updateMatch(
     away_team: string
     home_score: number
     away_score: number
+    period: MatchPeriod
+    clock_minute: number
+    stoppage: number
   }>,
 ) {
   const res = await fetch(`${API_BASE}/match`, {

@@ -11,6 +11,8 @@ export default function App() {
   const [score, setScore] = useState('--')
   const [home, setHome] = useState('')
   const [away, setAway] = useState('')
+  const [clock, setClock] = useState('')
+  const [period, setPeriod] = useState('')
   const [landscape, setLandscape] = useState(false)
   const shellRef = useRef<HTMLDivElement | null>(null)
   const { connected, hasSignal, setCanvas, setVideo } = useWorldFeed()
@@ -22,6 +24,8 @@ export default function App() {
         setScore(h.score)
         setHome(h.home)
         setAway(h.away)
+        setClock(h.clock ?? '')
+        setPeriod(h.period ?? '')
       } catch {
         /* ignore */
       }
@@ -89,6 +93,8 @@ export default function App() {
         <div className="flex items-center gap-3">
           <span className="rounded-full bg-[#f3f4f6] px-3 py-1 text-xs text-[#374151] ring-1 ring-[#e5e7eb]">
             {home || 'HOME'} {score} {away || 'AWAY'}
+            {clock ? ` · ${clock}` : ''}
+            {period ? ` ${period}` : ''}
           </span>
         </div>
       </header>

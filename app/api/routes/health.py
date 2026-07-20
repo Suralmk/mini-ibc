@@ -18,5 +18,8 @@ def health():
         "score": m.score_line(),
         "home_score": m.home_score,
         "away_score": m.away_score,
+        "period": m.period,
+        "clock": m.clock_display(),
         "graphic_active": g is not None,
+        "graphic_kind": g.kind if g else None,
     }

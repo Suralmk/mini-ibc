@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.git/
+.cursor/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+.env
+.env.*
+*.md
+*.log
+Dockerfile
+.dockerignore

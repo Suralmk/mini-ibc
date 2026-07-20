@@ -1,0 +1,43 @@
+services:
+  api:
+    image: ${DOCKERHUB_USER:-suralmk}/mini-ipc-api:${TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mini-ipc-api
+    ports:
+      - "8000:8000"
+    environment:
+      - CAMERA_INDEX=${CAMERA_INDEX:-0}
+    # Linux host webcam (optional). On Docker Desktop / Windows this may not work.
+    # devices:
+    #   - /dev/video0:/dev/video0
+    restart: unless-stopped
+
+  editor:
+    image: ${DOCKERHUB_USER:-suralmk}/mini-ipc-editor:${TAG:-latest}
+    build:
+      context: ./frontend/ibc-editor
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE: ""
+    container_name: mini-ipc-editor
+    ports:
+      - "5173:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  player:
+    image: ${DOCKERHUB_USER:-suralmk}/mini-ipc-player:${TAG:-latest}
+    build:
+      context: ./frontend/player
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE: ""
+    container_name: mini-ipc-player
+    ports:
+      - "5174:80"
+    depends_on:
+      - api
+    restart: unless-stopped

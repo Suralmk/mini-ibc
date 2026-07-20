@@ -1,0 +1,28 @@
+from __future__ import annotations
+
+from typing import Literal
+
+from pydantic import BaseModel, Field
+
+
+class MatchStateResponse(BaseModel):
+    home_team: str
+    away_team: str
+    home_score: int
+    away_score: int
+    score: str
+
+
+class MatchUpdateRequest(BaseModel):
+    home_team: str | None = Field(None, max_length=12)
+    away_team: str | None = Field(None, max_length=12)
+    home_score: int | None = Field(None, ge=0, le=99)
+    away_score: int | None = Field(None, ge=0, le=99)
+
+
+class GoalRequest(BaseModel):
+    side: Literal["home", "away"]
+    announce: bool = Field(
+        True,
+        description="Also push a GOAL title graphic onto the world feed",
+    )

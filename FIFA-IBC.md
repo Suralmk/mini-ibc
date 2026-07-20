@@ -210,13 +210,13 @@ Years of prep (including dress rehearsals / Club World Cup–scale tests), fake 
 
 ---
 
-## How this maps to **this repo** (mini-ipc)
+## How this maps to **this repo** (MINI IBC)
 
 This project is a **tiny teaching toy**, not a real HBS plant:
 
-| Real World Cup IBC | mini-ipc |
+| Real World Cup IBC | MINI IBC |
 |--------------------|----------|
-| Stadium cameras | Laptop webcam |
+| Stadium cameras | Webcam |
 | Fiber + ST 2110 + dual path | Local compose + WebSocket JPEG frames |
 | Multicast to many RHBs | Two React apps (editor + player) |
 | Graphics / scorebug teams | Editor pushes titles + live score API |
@@ -224,7 +224,7 @@ This project is a **tiny teaching toy**, not a real HBS plant:
 
 ```mermaid
 flowchart LR
-  CAM["Webcam"] --> API["FastAPI mini-ipc<br/>compose + match state"]
+  CAM["Webcam"] --> API["FastAPI MINI IBC<br/>compose + match state"]
   API -->|WebSocket JPEG| ED["ibc-editor :5173"]
   API -->|WebSocket JPEG| PL["player :5174"]
   ED -->|HTTP /graphics /match| API
@@ -240,4 +240,4 @@ Full narrative, people, PCAP demos, and stadium tour:
 
 **https://www.youtube.com/watch?v=LhnH0juUaGw**
 
-Credit: Network Chuck × HBS engineering (Kristoff and team). This document is an educational rewrite for the **mini-ipc** lab — not an official FIFA/HBS specification.
+Credit: Network Chuck × HBS engineering (Kristoff and team). This document is an educational rewrite for the **MINI IBC** lab — not an official FIFA/HBS specification.

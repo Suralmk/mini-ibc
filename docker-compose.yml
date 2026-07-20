@@ -1,10 +1,10 @@
 services:
   api:
-    image: ${DOCKERHUB_USER:-suralmk}/mini-ipc-api:${TAG:-latest}
+    image: ${DOCKERHUB_USER:-suralmk}/mini-ibc-api:${TAG:-latest}
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: mini-ipc-api
+    container_name: mini-ibc-api
     ports:
       - "8000:8000"
     environment:
@@ -15,13 +15,13 @@ services:
     restart: unless-stopped
 
   editor:
-    image: ${DOCKERHUB_USER:-suralmk}/mini-ipc-editor:${TAG:-latest}
+    image: ${DOCKERHUB_USER:-suralmk}/mini-ibc-editor:${TAG:-latest}
     build:
       context: ./frontend/ibc-editor
       dockerfile: Dockerfile
       args:
         VITE_API_BASE: ""
-    container_name: mini-ipc-editor
+    container_name: mini-ibc-editor
     ports:
       - "5173:80"
     depends_on:
@@ -29,13 +29,13 @@ services:
     restart: unless-stopped
 
   player:
-    image: ${DOCKERHUB_USER:-suralmk}/mini-ipc-player:${TAG:-latest}
+    image: ${DOCKERHUB_USER:-suralmk}/mini-ibc-player:${TAG:-latest}
     build:
       context: ./frontend/player
       dockerfile: Dockerfile
       args:
         VITE_API_BASE: ""
-    container_name: mini-ipc-player
+    container_name: mini-ibc-player
     ports:
       - "5174:80"
     depends_on:

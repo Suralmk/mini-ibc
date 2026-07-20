@@ -12,7 +12,7 @@ def health():
     m = match_store.get()
     return {
         "status": "ok",
-        "role": "mini-ipc",
+        "role": "mini-ibc",
         "home": m.home_team,
         "away": m.away_team,
         "score": m.score_line(),

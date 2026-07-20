@@ -12,9 +12,9 @@ AWAY_TEAM = "ARG"
 HOME_SCORE = 0
 AWAY_SCORE = 0
 
-APP_TITLE = "mini-ipc"
+APP_TITLE = "MINI IBC"
 APP_DESCRIPTION = (
-    "Laptop World Cup–style IBC: camera ingest, graphics burn-in, world-feed stream."
+    "World Cup–style IBC: camera ingest, graphics burn-in, world-feed stream."
 )
 
 # Allow LAN / phone browsers (lab PoC)

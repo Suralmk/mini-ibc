@@ -1,6 +1,6 @@
-# mini-ipc
+# MINI IBC
 
-A laptop-scale **International Broadcast Centre** lab: your webcam is the “stadium,” a FastAPI backend “makes” the match (scorebug + pulsed titles), and two React apps act as the graphics desk and a rights-holder player.
+**MINI IBC** is a small-scale **International Broadcast Centre** lab: your webcam is the “stadium,” a FastAPI backend “makes” the match (scorebug + pulsed titles), and two React apps act as the graphics desk and a rights-holder player.
 
 Inspired by how the real FIFA World Cup IBC works — stadium feeds over fiber into a central facility, then out to broadcasters worldwide. See **[FIFA-IBC.md](FIFA-IBC.md)** for that architecture (with diagrams), and Network Chuck’s tour for the full story: [YouTube](https://www.youtube.com/watch?v=LhnH0juUaGw).
 
@@ -23,7 +23,7 @@ FastAPI API  (:8000)   ← compose graphics / live score
 ## Project structure
 
 ```
-mini-ipc/
+mini-ibc/
 ├── app/                         # FastAPI backend
 ├── frontend/
 │   ├── ibc-editor/
@@ -40,8 +40,8 @@ mini-ipc/
 ## Option A — Clone and run locally (dev)
 
 ```bash
-git clone <your-repo-url> mini-ipc
-cd mini-ipc
+git clone <your-repo-url> mini-ibc
+cd mini-ibc
 ```
 
 **1. Backend**
@@ -83,9 +83,9 @@ Images:
 
 | Service | Image |
 |---------|--------|
-| API | `suralmk/mini-ipc-api` |
-| Editor | `suralmk/mini-ipc-editor` |
-| Player | `suralmk/mini-ipc-player` |
+| API | `suralmk/mini-ibc-api` |
+| Editor | `suralmk/mini-ibc-editor` |
+| Player | `suralmk/mini-ibc-player` |
 
 ```bash
 export DOCKERHUB_USER=suralmk

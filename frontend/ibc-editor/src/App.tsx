@@ -105,8 +105,8 @@ export default function App() {
     <div className="flex h-screen flex-col overflow-hidden bg-[#f5f5f5] text-[#1a1a1a]">
       <header className="flex h-12 shrink-0 items-center justify-between border-b border-[#e5e5e5] bg-white px-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#0d99ff] text-xs font-bold text-white">
-            IBC
+          <div className="flex h-7 items-center justify-center rounded-md bg-[#0d99ff] px-1.5 text-[10px] font-bold tracking-tight text-white">
+            MINI IBC
           </div>
           <div>
             <p className="text-sm font-medium leading-none text-[#111]">

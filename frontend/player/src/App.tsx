@@ -80,7 +80,7 @@ export default function App() {
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e5e7eb] bg-white px-6 py-5">
         <div>
           <p className="text-xs uppercase tracking-[0.14em] text-[#6b7280]">
-            Rights-holder · Broadcaster
+            MINI IBC · Rights-holder
           </p>
           <h1 className="text-xl font-semibold text-[#111827]">
             World Feed Player

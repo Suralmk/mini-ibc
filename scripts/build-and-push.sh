@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build mini-ipc images and push them to Docker Hub.
+# Build MINI IBC images and push them to Docker Hub.
 #
 # Usage:
 #   export DOCKERHUB_USER=suralmk
@@ -30,9 +30,9 @@ if [[ -z "${DOCKERHUB_USER}" ]]; then
 fi
 
 TAG="${1:-latest}"
-API_IMAGE="${DOCKERHUB_USER}/mini-ipc-api"
-EDITOR_IMAGE="${DOCKERHUB_USER}/mini-ipc-editor"
-PLAYER_IMAGE="${DOCKERHUB_USER}/mini-ipc-player"
+API_IMAGE="${DOCKERHUB_USER}/mini-ibc-api"
+EDITOR_IMAGE="${DOCKERHUB_USER}/mini-ibc-editor"
+PLAYER_IMAGE="${DOCKERHUB_USER}/mini-ibc-player"
 
 echo "==> Building ${API_IMAGE}:${TAG}"
 docker build -t "${API_IMAGE}:${TAG}" -f Dockerfile .

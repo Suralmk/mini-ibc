@@ -275,6 +275,27 @@ def burn_in_lower_third(frame: np.ndarray, graphic: ActiveGraphic) -> None:
     cv2.addWeighted(layer, opacity * 0.97, frame, 1 - opacity * 0.97, 0, frame)
 
 
+def _rounded_rect_points(
+    x1: int, y1: int, x2: int, y2: int, r: int, segments: int = 16
+) -> np.ndarray:
+    """Clockwise contour of a rounded rectangle (smooth continuous corners)."""
+    r = max(1, min(r, (x2 - x1) // 2, (y2 - y1) // 2))
+    pts: list[list[int]] = []
+
+    def arc(cx: float, cy: float, a0: float, a1: float) -> None:
+        for i in range(segments + 1):
+            a = a0 + (a1 - a0) * (i / segments)
+            pts.append(
+                [int(round(cx + r * np.cos(a))), int(round(cy + r * np.sin(a)))]
+            )
+
+    arc(x1 + r, y1 + r, np.pi, 1.5 * np.pi)        # top-left
+    arc(x2 - r, y1 + r, 1.5 * np.pi, 2.0 * np.pi)  # top-right
+    arc(x2 - r, y2 - r, 0.0, 0.5 * np.pi)          # bottom-right
+    arc(x1 + r, y2 - r, 0.5 * np.pi, np.pi)        # bottom-left
+    return np.asarray(pts, dtype=np.int32)
+
+
 def _fill_round_rect(
     img: np.ndarray,
     pt1: tuple[int, int],
@@ -284,57 +305,90 @@ def _fill_round_rect(
 ) -> None:
     x1, y1 = pt1
     x2, y2 = pt2
+    if x2 <= x1 or y2 <= y1:
+        return
     r = max(1, min(radius, (x2 - x1) // 2, (y2 - y1) // 2))
-    cv2.rectangle(img, (x1 + r, y1), (x2 - r, y2), color, -1)
-    cv2.rectangle(img, (x1, y1 + r), (x2, y2 - r), color, -1)
-    cv2.circle(img, (x1 + r, y1 + r), r, color, -1, cv2.LINE_AA)
-    cv2.circle(img, (x2 - r, y1 + r), r, color, -1, cv2.LINE_AA)
-    cv2.circle(img, (x1 + r, y2 - r), r, color, -1, cv2.LINE_AA)
-    cv2.circle(img, (x2 - r, y2 - r), r, color, -1, cv2.LINE_AA)
+    pts = _rounded_rect_points(x1, y1, x2, y2, r)
+    cv2.fillPoly(img, [pts], color, cv2.LINE_AA)
+
+
+# Border stops (BGR) — gradient of the design's own accent colors:
+# header blue accent → mint green (scores) → header blue accent.
+_BORDER_STOPS = (0.0, 0.5, 1.0)
+_BORDER_COLORS = np.array(
+    [
+        (200, 95, 55),    # blue header accent
+        (188, 255, 168),  # mint green
+        (200, 95, 55),    # blue header accent
+    ],
+    dtype=np.float32,
+)
 
 
 def _draw_gradient_border(
     img: np.ndarray,
     pt1: tuple[int, int],
     pt2: tuple[int, int],
-    thickness: int = 3,
+    thickness: int = 2,
     radius: int = 14,
 ) -> None:
-    """Approx FIFA rainbow border: purple → blue → green → orange."""
+    """
+    Smooth rounded rainbow border (135° magenta→blue→green→orange), matching
+    the editor Scorebug preview. Uses a 2× supersampled outer−inner ring mask
+    so corners stay clean — no line/arc joint blobs or pixel stairs.
+    """
     x1, y1 = pt1
     x2, y2 = pt2
-    # BGR stops
-    stops = [
-        (180, 60, 200),   # purple
-        (255, 120, 60),   # blue
-        (80, 220, 80),    # green
-        (40, 120, 255),   # orange
-    ]
-    # Top edge
-    for i in range(x2 - x1):
-        t = i / max(1, x2 - x1 - 1)
-        c = _lerp_color(stops[0], stops[1], min(1.0, t * 1.2))
-        cv2.line(img, (x1 + i, y1), (x1 + i, y1 + thickness - 1), c, 1)
-    # Right edge
-    for i in range(y2 - y1):
-        t = i / max(1, y2 - y1 - 1)
-        c = _lerp_color(stops[1], stops[2], t)
-        cv2.line(img, (x2 - thickness + 1, y1 + i), (x2, y1 + i), c, 1)
-    # Bottom edge
-    for i in range(x2 - x1):
-        t = i / max(1, x2 - x1 - 1)
-        c = _lerp_color(stops[2], stops[3], t)
-        cv2.line(img, (x2 - i, y2), (x2 - i, y2 - thickness + 1), c, 1)
-    # Left edge
-    for i in range(y2 - y1):
-        t = i / max(1, y2 - y1 - 1)
-        c = _lerp_color(stops[3], stops[0], t)
-        cv2.line(img, (x1, y2 - i), (x1 + thickness - 1, y2 - i), c, 1)
-    # Soft corner accents
-    cv2.ellipse(img, (x1 + radius, y1 + radius), (radius, radius), 180, 0, 90, stops[0], thickness)
-    cv2.ellipse(img, (x2 - radius, y1 + radius), (radius, radius), 270, 0, 90, stops[1], thickness)
-    cv2.ellipse(img, (x2 - radius, y2 - radius), (radius, radius), 0, 0, 90, stops[2], thickness)
-    cv2.ellipse(img, (x1 + radius, y2 - radius), (radius, radius), 90, 0, 90, stops[3], thickness)
+    if x2 - x1 < 8 or y2 - y1 < 8:
+        return
+
+    t = max(1, min(thickness, 3))
+    r = max(2, min(radius, (x2 - x1) // 2, (y2 - y1) // 2))
+
+    h, w = img.shape[:2]
+    pad = t + 1
+    ox1, oy1 = max(0, x1 - pad), max(0, y1 - pad)
+    ox2, oy2 = min(w, x2 + pad + 1), min(h, y2 + pad + 1)
+    rw, rh = ox2 - ox1, oy2 - oy1
+    if rw < 4 or rh < 4:
+        return
+
+    scale = 2
+    mask = np.zeros((rh * scale, rw * scale), dtype=np.uint8)
+    lx1 = (x1 - ox1) * scale
+    ly1 = (y1 - oy1) * scale
+    lx2 = (x2 - ox1) * scale
+    ly2 = (y2 - oy1) * scale
+    sr = r * scale
+    st = t * scale
+    outer = _rounded_rect_points(lx1, ly1, lx2, ly2, sr, segments=24)
+    inner = _rounded_rect_points(
+        lx1 + st, ly1 + st, lx2 - st, ly2 - st, max(1, sr - st), segments=24
+    )
+    cv2.fillPoly(mask, [outer], 255)
+    cv2.fillPoly(mask, [inner], 0)
+    ring = cv2.resize(mask, (rw, rh), interpolation=cv2.INTER_AREA)
+    alpha = ring.astype(np.float32) * (1.0 / 255.0)
+    if float(alpha.max()) < 1e-3:
+        return
+
+    # 135° diagonal gradient: 0 at top-left → 1 at bottom-right
+    denom = float((x2 - x1) + (y2 - y1)) or 1.0
+    xs = (np.arange(ox1, ox2, dtype=np.float32) - x1).reshape(1, -1)
+    ys = (np.arange(oy1, oy2, dtype=np.float32) - y1).reshape(-1, 1)
+    tt = np.clip((xs + ys) / denom, 0.0, 1.0)
+
+    grad = np.empty((rh, rw, 3), dtype=np.float32)
+    flat = tt.ravel()
+    for c in range(3):
+        grad[:, :, c] = np.interp(
+            flat, _BORDER_STOPS, _BORDER_COLORS[:, c]
+        ).reshape(rh, rw)
+
+    a = alpha[:, :, None]
+    roi = img[oy1:oy2, ox1:ox2].astype(np.float32)
+    roi = roi * (1.0 - a) + grad * a
+    img[oy1:oy2, ox1:ox2] = np.clip(roi, 0, 255).astype(np.uint8)
 
 
 def _lerp_color(

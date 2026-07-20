@@ -68,6 +68,7 @@ export type MatchState = {
   clock_minute: number
   stoppage: number
   clock: string
+  clock_running?: boolean
 }
 
 export function wsStreamUrl() {
@@ -144,6 +145,21 @@ export async function updateMatch(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(patch),
   })
+  return parseJson<MatchState>(res)
+}
+
+export async function startMatchClock() {
+  const res = await fetch(`${API_BASE}/match/start`, { method: 'POST' })
+  return parseJson<MatchState>(res)
+}
+
+export async function pauseMatchClock() {
+  const res = await fetch(`${API_BASE}/match/pause`, { method: 'POST' })
+  return parseJson<MatchState>(res)
+}
+
+export async function resetMatchClock() {
+  const res = await fetch(`${API_BASE}/match/reset-clock`, { method: 'POST' })
   return parseJson<MatchState>(res)
 }
 

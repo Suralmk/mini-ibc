@@ -20,6 +20,7 @@ def _response() -> MatchStateResponse:
         clock_minute=s.clock_minute,
         stoppage=s.stoppage,
         clock=s.clock_display(),
+        clock_running=s.clock_running,
     )
 
 
@@ -42,10 +43,29 @@ def update_match(req: MatchUpdateRequest):
     return _response()
 
 
+@router.post("/start", response_model=MatchStateResponse)
+def start_match():
+    """Start / resume the live scorebug clock from 0:00 (or current elapsed)."""
+    match_store.start_clock()
+    return _response()
+
+
+@router.post("/pause", response_model=MatchStateResponse)
+def pause_match():
+    match_store.pause_clock()
+    return _response()
+
+
+@router.post("/reset-clock", response_model=MatchStateResponse)
+def reset_match_clock():
+    match_store.reset_clock()
+    return _response()
+
+
 @router.post("/goal", response_model=MatchStateResponse)
 def add_goal(req: GoalRequest):
     try:
-        state = match_store.add_goal(req.side)
+        match_store.add_goal(req.side)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
 

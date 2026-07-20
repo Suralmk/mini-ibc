@@ -3,7 +3,10 @@ import {
   addGoal,
   getActiveGraphic,
   getMatch,
+  pauseMatchClock,
   pushGraphic,
+  resetMatchClock,
+  startMatchClock,
   updateMatch,
   type MatchPeriod,
   type MatchState,
@@ -23,20 +26,20 @@ const LT_PRESETS = [
   {
     label: 'Coach',
     title: 'Lionel Scaloni',
-    subtitle: 'Head Coach · Argentina',
+    subtitle: 'Head Coach - Argentina',
     line3: '',
   },
   {
     label: 'Referee',
     title: 'Szymon Marciniak',
-    subtitle: 'Referee · Poland',
+    subtitle: 'Referee - Poland',
     line3: '',
   },
   {
     label: 'Interview',
     title: 'Post-Match Interview',
     subtitle: 'Mixed Zone',
-    line3: 'Breaking · Exclusive',
+    line3: 'Breaking - Exclusive',
   },
 ] as const
 
@@ -49,7 +52,8 @@ const emptyMatch: MatchState = {
   period: '1H',
   clock_minute: 0,
   stoppage: 0,
-  clock: "0'",
+  clock: '0:00',
+  clock_running: false,
 }
 
 export default function App() {
@@ -189,11 +193,41 @@ export default function App() {
 
   async function startET() {
     await patchMatch({ period: 'ET', clock_minute: 90, stoppage: 0 })
-    setStatus('Extra time started · 90\'')
+    setStatus("Extra time started · 90'")
   }
 
   async function bumpStoppage() {
     await patchMatch({ stoppage: match.stoppage + 1 })
+  }
+
+  async function onStartMatch() {
+    try {
+      const m = await startMatchClock()
+      setMatch(m)
+      setStatus('Match started · clock running from 0:00')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Start failed')
+    }
+  }
+
+  async function onPauseMatch() {
+    try {
+      const m = await pauseMatchClock()
+      setMatch(m)
+      setStatus(`Clock paused · ${m.clock}`)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Pause failed')
+    }
+  }
+
+  async function onResetClock() {
+    try {
+      const m = await resetMatchClock()
+      setMatch(m)
+      setStatus('Clock reset · 0:00')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Reset failed')
+    }
   }
 
   return (
@@ -457,6 +491,36 @@ export default function App() {
             Match · Clock
           </div>
           <div className="flex-1 space-y-5 overflow-y-auto p-3">
+            <section className="space-y-2">
+              <button
+                type="button"
+                onClick={() => void onStartMatch()}
+                className="w-full rounded-md bg-[#059669] px-3 py-2.5 text-sm font-semibold text-white hover:brightness-110"
+              >
+                {match.clock_running ? 'Restart match' : 'Start match'}
+              </button>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  disabled={!match.clock_running}
+                  onClick={() => void onPauseMatch()}
+                  className="rounded-md border border-[#e5e7eb] bg-[#f9fafb] px-2 py-2 text-xs font-semibold text-[#374151] hover:border-[#0d99ff] disabled:opacity-40"
+                >
+                  Pause
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void onResetClock()}
+                  className="rounded-md border border-[#e5e7eb] bg-[#f9fafb] px-2 py-2 text-xs font-semibold text-[#374151] hover:border-[#0d99ff]"
+                >
+                  Reset 0:00
+                </button>
+              </div>
+              <p className="text-[10px] text-[#9ca3af]">
+                Scorebug clock counts live from 0:00 when you start.
+              </p>
+            </section>
+
             <section className="space-y-3">
               <p className="text-[11px] uppercase tracking-wider text-[#6b7280]">
                 Scorebug

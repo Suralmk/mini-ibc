@@ -17,6 +17,7 @@ class MatchStateResponse(BaseModel):
     clock_minute: int
     stoppage: int
     clock: str
+    clock_running: bool = False
 
 
 class MatchUpdateRequest(BaseModel):

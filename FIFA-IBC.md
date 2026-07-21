@@ -2,7 +2,7 @@
 
 A clear summary of how the **International Broadcast Centre (IBC)** turns a match at a stadium into what you watch on TV worldwide.
 
-Inspired by Network Chuck’s deep dive with HBS (Host Broadcast Services). For the full story, tour footage, and packet-capture walkthrough, watch:
+Inspired by Network Chuck’s deep dive with HBS (Host Broadcast Services). For the full story and packet-capture analysis, watch:
 
 **[How the World Cup Network Works (Network Chuck)](https://www.youtube.com/watch?v=LhnH0juUaGw)**
 
@@ -110,13 +110,13 @@ flowchart TB
 
 **Why red + blue?** Not idle backups. Both copies are sent and both are used. Receivers pick **whichever packet arrives first** (hitless). Red and blue should take **different switch paths** so one failure doesn’t kill both.
 
-Demo addressing (illustrative only — not real tournament IPs):
+Illustrative addressing (not real tournament IPs):
 
-| Role | Demo network | Notes |
+| Role | Illustrative network | Notes |
 |------|----------------|-------|
 | Red video | `10.182.0.0/16` | Second octet marks “color” / plane |
 | Blue video | `10.181.0.0/16` | Physically separate fabric |
-| Video vs audio | `…x.20.*` vs `…x.30.*` | Convention in demos/docs |
+| Video vs audio | `…x.20.*` vs `…x.30.*` | Typical convention |
 | Multicast group (example) | `239.10.20.1` | Many receivers join one group |
 
 ---
@@ -134,7 +134,7 @@ Camera A ──(1 stream)──► IBC fabric ──┬──► Broadcaster Fox
                                       └──► …
 ```
 
-Scale discussed in the tour:
+Typical scale at the IBC:
 
 - On the order of **~150,000 multicast flows** managed at once  
 - ~**45 cameras** per match (finals often more, e.g. ~50)  
@@ -156,7 +156,7 @@ At each receiver: identical red/blue RTP-style streams → **first packet wins**
 
 World Cup contribution video is often **uncompressed** over IP (far heavier than YouTube MP4).
 
-From the video’s capture walkthrough (orders of magnitude):
+Packet capture scale (orders of magnitude):
 
 | Sample | Packets | Wall time | Rough rate |
 |--------|---------|-----------|------------|
@@ -167,7 +167,7 @@ Useful filters / ideas (Wireshark-style):
 
 - **ST 2110-20** — uncompressed video essence  
 - **RTP marker** — frame boundaries  
-- Example geometry discussed: 1080p @ 59.94 fps → on the order of **thousands of packets per frame** (e.g. ~4320 in the demo math)  
+- At 1080p @ 59.94 fps, a single frame requires on the order of **thousands of packets** (e.g. ~4320)  
 - Same sequence/timestamp on red vs blue, **different destinations / networks**
 
 That is how a kick in Boston can become pixels on a TV in Singapore: stadium → dual fiber → IBC production → multicast → rights holder → local broadcast.
@@ -203,7 +203,7 @@ HBS also typically **runs its own fiber** inside the venue rather than relying o
 
 The IBC and its mission-critical network are **temporary**:
 
-- Built in months (on the order of ~4 months in the tour narrative)  
+- Built in months (on the order of ~4 months)  
 - Torn down after the trophy lift (days to start pack-up; weeks to fully demobilize)  
 
 Years of prep (including dress rehearsals / Club World Cup–scale tests), fake matches, and audio sync make match day feel calm — more “well-oiled machine” than NASA countdown.
@@ -237,8 +237,8 @@ See the main [README](README.md) for how to run the PoC.
 
 ## Further watching
 
-Full narrative, people, PCAP demos, and stadium tour:
+Full story, PCAP analysis, and engineering context:
 
 **https://www.youtube.com/watch?v=LhnH0juUaGw**
 
-Credit: Network Chuck × HBS engineering (Kristoff and team). This document is an educational rewrite for the **MINI IBC** lab — not an official FIFA/HBS specification.
+Credit: Network Chuck × HBS engineering (Kristoff and team). This document is an educational summary for the **MINI IBC** lab — not an official FIFA/HBS specification.
